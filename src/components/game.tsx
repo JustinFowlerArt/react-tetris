@@ -1,28 +1,33 @@
 import { useEffect, useRef, useState } from 'react';
-import { Block } from './block';
-import { checkCollision } from './utilities';
+import Canvas from './canvas';
+import { checkCollision, gameHeight, gameWidth } from './utilities';
 
-interface Block {
+interface Props {
+	width: number;
+	height: number;
+}
+
+export interface iBlock {
 	id: number;
 	xPosition: number;
 	yPosition: number;
 	rotation: number;
 }
 
-export const Game = () => {
+export const Game = ({ width, height }: Props) => {
 	const [score, setScore] = useState(0);
 
 	const [counter, setCounter] = useState(0);
 	const countRef = useRef(counter);
 	countRef.current = counter;
 
-	const [blocks, setBlocks] = useState<Array<Block>>([]);
+	const [blocks, setBlocks] = useState<Array<iBlock>>([]);
 
-	const [xPosition, setXPosition] = useState(8);
+	const [xPosition, setXPosition] = useState(0);
 	const xPositionRef = useRef(xPosition);
 	xPositionRef.current = xPosition;
 
-	const [yPosition, setYPosition] = useState(0);
+	const [yPosition, setYPosition] = useState(100 - gameHeight);
 	const yPositionRef = useRef(yPosition);
 	yPositionRef.current = yPosition;
 
@@ -32,7 +37,7 @@ export const Game = () => {
 
 	useEffect(() => {
 		const initializer = setInterval(() => {
-			setYPosition(yPosition => yPosition + 2);
+			setYPosition(yPosition => yPosition + 64);
 		}, 1000);
 		window.addEventListener('keydown', handleKeyDown);
 		return () => {
@@ -52,35 +57,35 @@ export const Game = () => {
 			},
 		]);
 		setCounter(counter + 1);
-		setXPosition(8);
-		setYPosition(0);
+		setXPosition(0);
+		setYPosition(100 - gameHeight);
 		setRotation(0);
 	};
 
 	const activeBlock = {
 		x1: xPosition,
-		y1: yPosition,
-		x2: xPosition + 4,
-		y2: yPosition + 4,
+		y1: yPosition - 64,
+		x2: xPosition + 64,
+		y2: yPosition + 256,
 	};
 
-	const floor = {
-		x1: 0,
-		y1: 40,
-		x2: 20,
-		y2: 40,
+	const ground = {
+		x1: gameWidth / -2,
+		y1: 36,
+		x2: gameWidth / 2,
+		y2: 100,
 	};
 
-	if (checkCollision(activeBlock, floor)) {
+	if (checkCollision(activeBlock, ground)) {
 		updateBlocks();
 	}
 
 	blocks?.forEach(block => {
 		const blockLocation = {
 			x1: block.xPosition,
-			y1: block.yPosition,
-			x2: block.xPosition + 4,
-			y2: block.yPosition + 4,
+			y1: block.yPosition - 64,
+			x2: block.xPosition + 64,
+			y2: block.yPosition + 256,
 		};
 		if (checkCollision(activeBlock, blockLocation)) {
 			updateBlocks();
@@ -93,16 +98,16 @@ export const Game = () => {
 			case 'a':
 			case 'ArrowLeft':
 				{
-					if (xPositionRef.current > 0) {
-						setXPosition(xPosition => xPosition - 2);
+					if (xPositionRef.current > gameWidth / -2) {
+						setXPosition(xPosition => xPosition - 64);
 					}
 				}
 				break;
 			case 'd':
 			case 'ArrowRight':
 				{
-					if (xPositionRef.current < 16) {
-						setXPosition(xPosition => xPosition + 2);
+					if (xPositionRef.current < gameWidth / 2 - 64) {
+						setXPosition(xPosition => xPosition + 64);
 					}
 				}
 				break;
@@ -128,7 +133,7 @@ export const Game = () => {
 				break;
 			case ' ': {
 				{
-					setYPosition(yPosition => yPosition + 2);
+					setYPosition(yPosition => yPosition + 64);
 				}
 				break;
 			}
@@ -138,26 +143,34 @@ export const Game = () => {
 	};
 
 	return (
-		<main className='flex justify-center items-center'>
-			<div className='flex flex-col items-center p-4'>
-				<h1 className='text-3xl'>React Tetris</h1>
-				<h2 className='text-xl'>Score: {score}</h2>
-				<div className='relative bg-slate-500 w-80 h-[40rem] m-4'>
-					<Block
-						xPosition={xPosition}
-						yPosition={yPosition}
-						rotation={rotation}
-					/>
-					{blocks?.map(block => (
-						<Block
-							key={block.id}
-							xPosition={block.xPosition}
-							yPosition={block.yPosition}
-							rotation={block.rotation}
-						/>
-					))}
-				</div>
-			</div>
-		</main>
+		<Canvas
+			width={width}
+			height={height}
+			blocks={blocks}
+			xPosition={xPosition}
+			yPosition={yPosition}
+			rotation={rotation}
+		/>
+		// <main className='flex flex-col justify-center items-center'>
+		// 	<h1 className='text-3xl'>React Tetris</h1>
+		// 	<h2 className='text-xl'>Score: {score}</h2>
+		// 	<div className='flex flex-col items-center p-4'>
+		// 		<div className='relative bg-slate-500 w-80 h-[40rem] m-4'>
+		// 			<Block
+		// 				xPosition={xPosition}
+		// 				yPosition={yPosition}
+		// 				rotation={rotation}
+		// 			/>
+		// 			{blocks?.map(block => (
+		// 				<Block
+		// 					key={block.id}
+		// 					xPosition={block.xPosition}
+		// 					yPosition={block.yPosition}
+		// 					rotation={block.rotation}
+		// 				/>
+		// 			))}
+		// 		</div>
+		// 	</div>
+		// </main>
 	);
 };

@@ -5,13 +5,13 @@ interface Props {
 }
 
 export const Block = ({ xPosition, yPosition, rotation }: Props) => {
-	const dynamicStyles = {
-		left: `${xPosition}rem`,
-		top: `${yPosition}rem`,
-		transform: `rotate(${rotation}deg)`,
-	};
-
 	return (
-		<div className='absolute bg-green-500 w-16 h-8' style={dynamicStyles}></div>
+		<rect
+			x={xPosition}
+			y={yPosition}
+			width={64}
+			height={256}
+			transform={`rotate(${rotation}, ${xPosition}, ${yPosition})`}
+		/>
 	);
 };

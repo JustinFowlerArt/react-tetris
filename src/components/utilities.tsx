@@ -10,3 +10,7 @@ export const checkCollision = (rectA: BoxCollider, rectB: BoxCollider) =>
 	rectA.x2 > rectB.x1 &&
 	rectA.y1 < rectB.y2 &&
 	rectA.y2 > rectB.y1;
+
+export const gameHeight = 1280;
+
+export const gameWidth = 640;
