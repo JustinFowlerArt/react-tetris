@@ -1,98 +1,137 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActiveBlock } from './activeBlock';
+import { Block } from './block';
+import { checkCollision } from './utilities';
 
 interface Block {
 	id: number;
-	position: { x: number; y: number };
+	xPosition: number;
+	yPosition: number;
 	rotation: number;
 }
 
 export const Game = () => {
 	const [score, setScore] = useState(0);
-	const [activeBlock, setActiveBlock] = useState<Block>({
-		id: 0,
-		position: { x: 8, y: 0 },
-		rotation: 0,
-	});
-	// const [blocks, setBlocks] = useState<Array<Block>>([]);
-	const [counter, setCounter] = useState(1);
 
+	const [counter, setCounter] = useState(0);
 	const countRef = useRef(counter);
 	countRef.current = counter;
 
+	const [blocks, setBlocks] = useState<Array<Block>>([]);
+
+	const [xPosition, setXPosition] = useState(8);
+	const xPositionRef = useRef(xPosition);
+	xPositionRef.current = xPosition;
+
+	const [yPosition, setYPosition] = useState(0);
+	const yPositionRef = useRef(yPosition);
+	yPositionRef.current = yPosition;
+
+	const [rotation, setRotation] = useState(0);
+	const rotationRef = useRef(rotation);
+	rotationRef.current = rotation;
+
 	useEffect(() => {
 		const initializer = setInterval(() => {
-			const updatedBlock = copyBlock();
-			if (countRef.current < 20) {
-				updatedBlock.position.x = activeBlock.position.x;
-				updatedBlock.position.y = activeBlock.position.y += 2;
-				setCounter(counter => counter + 1);
-			} else {
-				updatedBlock.id += 1;
-				updatedBlock.position.x = activeBlock.position.x = 8;
-				updatedBlock.position.y = activeBlock.position.y = 0;
-				updatedBlock.rotation = 0;
-				setCounter(counter => counter - 19);
-			}
-			setActiveBlock(updatedBlock);
+			setYPosition(yPosition => yPosition + 2);
 		}, 1000);
 		window.addEventListener('keydown', handleKeyDown);
 		return () => {
 			clearInterval(initializer);
 			window.removeEventListener('keydown', handleKeyDown);
 		};
-	}, []);
+	}, [blocks]);
 
-	const copyBlock = () => {
-		const blockCopy: Block = {
-			...activeBlock,
-			position: { ...activeBlock.position },
+	const updateBlocks = () => {
+		setBlocks([
+			...blocks,
+			{
+				id: counter,
+				xPosition: xPosition,
+				yPosition: yPosition,
+				rotation: rotation,
+			},
+		]);
+		setCounter(counter + 1);
+		setXPosition(8);
+		setYPosition(0);
+		setRotation(0);
+	};
+
+	const activeBlock = {
+		x1: xPosition,
+		y1: yPosition,
+		x2: xPosition + 4,
+		y2: yPosition + 4,
+	};
+
+	const floor = {
+		x1: 0,
+		y1: 40,
+		x2: 20,
+		y2: 40,
+	};
+
+	if (checkCollision(activeBlock, floor)) {
+		updateBlocks();
+	}
+
+	blocks?.forEach(block => {
+		const blockLocation = {
+			x1: block.xPosition,
+			y1: block.yPosition,
+			x2: block.xPosition + 4,
+			y2: block.yPosition + 4,
 		};
-		return blockCopy;
-	};
-
-	const handleClick = (): void => {
-		const updatedBlock = copyBlock();
-		updatedBlock.rotation += 90;
-		setActiveBlock(updatedBlock);
-	};
+		if (checkCollision(activeBlock, blockLocation)) {
+			updateBlocks();
+		}
+	});
 
 	const handleKeyDown = (e: KeyboardEvent) => {
 		const { key } = e;
-		console.log(key);
 		switch (key) {
 			case 'a':
 			case 'ArrowLeft':
 				{
-					const updatedBlock = copyBlock();
-					updatedBlock.position.x -= 2;
-					setActiveBlock(updatedBlock);
+					if (xPositionRef.current > 0) {
+						setXPosition(xPosition => xPosition - 2);
+					}
 				}
 				break;
 			case 'd':
 			case 'ArrowRight':
 				{
-					const updatedBlock = copyBlock();
-					updatedBlock.position.x += 2;
-					setActiveBlock(updatedBlock);
+					if (xPositionRef.current < 16) {
+						setXPosition(xPosition => xPosition + 2);
+					}
 				}
 				break;
 			case 'w':
 			case 'ArrowUp':
 				{
-					const updatedBlock = copyBlock();
-					updatedBlock.rotation -= 90;
-					setActiveBlock(updatedBlock);
+					if (rotationRef.current <= 0) {
+						setRotation(rotation => 270 - rotation);
+					} else {
+						setRotation(rotation => rotation - 90);
+					}
 				}
 				break;
 			case 's':
 			case 'ArrowDown':
 				{
-					const updatedBlock = copyBlock();
-					updatedBlock.rotation += 90;
-					setActiveBlock(updatedBlock);
+					if (rotationRef.current >= 270) {
+						setRotation(rotation => rotation - 270);
+					} else {
+						setRotation(rotation => rotation + 90);
+					}
 				}
 				break;
+			case ' ': {
+				{
+					setYPosition(yPosition => yPosition + 2);
+				}
+				break;
+			}
 			default:
 				break;
 		}
@@ -103,25 +142,20 @@ export const Game = () => {
 			<div className='flex flex-col items-center p-4'>
 				<h1 className='text-3xl'>React Tetris</h1>
 				<h2 className='text-xl'>Score: {score}</h2>
-				<h2 className='text-xl'>Counter: {counter}</h2>
 				<div className='relative bg-slate-500 w-80 h-[40rem] m-4'>
-					<ActiveBlock
-						key={activeBlock.id}
-						id={activeBlock.id}
-						position={activeBlock.position}
-						rotation={activeBlock.rotation}
-						handleClick={handleClick}
+					<Block
+						xPosition={xPosition}
+						yPosition={yPosition}
+						rotation={rotation}
 					/>
-					{/* {blocks?.map(block => (
+					{blocks?.map(block => (
 						<Block
 							key={block.id}
-							id={block.id}
-							position={block.position}
+							xPosition={block.xPosition}
+							yPosition={block.yPosition}
 							rotation={block.rotation}
-							handleClick={handleClick}
 						/>
-					))} */}
-					<div className='absolute bottom-0 w-80'></div>
+					))}
 				</div>
 			</div>
 		</main>
