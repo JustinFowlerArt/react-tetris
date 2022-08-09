@@ -1,13 +1,9 @@
 import { gameHeight, gameWidth } from './utilities';
 
 export const Background = () => {
-	const skyStyle = {
-		fill: '#30abef',
-	};
-
 	return (
 		<rect
-			style={skyStyle}
+			className='fill-sky-500'
 			x={gameWidth / -2}
 			y={100 - gameHeight}
 			width={gameWidth}

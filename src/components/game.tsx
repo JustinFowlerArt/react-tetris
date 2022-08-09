@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Canvas from './canvas';
+import { checkCollisions } from './checkCollisions';
 import { checkCollision, gameHeight, gameWidth } from './utilities';
 
 interface Props {
@@ -12,16 +13,33 @@ export interface iBlock {
 	xPosition: number;
 	yPosition: number;
 	rotation: number;
+	// subBlocks: Array<iSubBlock>;
 }
 
+// export interface iSubBlock {
+// 	xPosition: number;
+// 	yPosition: number;
+// }
+
 export const Game = ({ width, height }: Props) => {
-	const [score, setScore] = useState(0);
+	// const [score, setScore] = useState(0);
+	const [gameOver, setGameOver] = useState(false);
+
+	const [leftOpen, setLeftOpen] = useState(true);
+	const leftRef = useRef(leftOpen);
+	leftRef.current = leftOpen;
+
+	const [rightOpen, setRightOpen] = useState(true);
+	const rightRef = useRef(rightOpen);
+	rightRef.current = rightOpen;
+
+	const [blocks, setBlocks] = useState<Array<iBlock>>([]);
 
 	const [counter, setCounter] = useState(0);
 	const countRef = useRef(counter);
 	countRef.current = counter;
 
-	const [blocks, setBlocks] = useState<Array<iBlock>>([]);
+	// const [spaceAvailable, setSpaceAvailable] = useState(true);
 
 	const [xPosition, setXPosition] = useState(0);
 	const xPositionRef = useRef(xPosition);
@@ -35,16 +53,12 @@ export const Game = ({ width, height }: Props) => {
 	const rotationRef = useRef(rotation);
 	rotationRef.current = rotation;
 
-	useEffect(() => {
-		const initializer = setInterval(() => {
-			setYPosition(yPosition => yPosition + 64);
-		}, 1000);
-		window.addEventListener('keydown', handleKeyDown);
-		return () => {
-			clearInterval(initializer);
-			window.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [blocks]);
+	const activeBlock = {
+		x1: xPosition - 32,
+		y1: yPosition - 32,
+		x2: xPosition + 32,
+		y2: yPosition + 33,
+	};
 
 	const updateBlocks = () => {
 		setBlocks([
@@ -54,6 +68,7 @@ export const Game = ({ width, height }: Props) => {
 				xPosition: xPosition,
 				yPosition: yPosition,
 				rotation: rotation,
+				// subBlocks: [{ xPosition, yPosition }],
 			},
 		]);
 		setCounter(counter + 1);
@@ -62,35 +77,40 @@ export const Game = ({ width, height }: Props) => {
 		setRotation(0);
 	};
 
-	const activeBlock = {
-		x1: xPosition,
-		y1: yPosition - 64,
-		x2: xPosition + 64,
-		y2: yPosition + 256,
-	};
-
-	const ground = {
-		x1: gameWidth / -2,
-		y1: 36,
-		x2: gameWidth / 2,
-		y2: 100,
-	};
-
-	if (checkCollision(activeBlock, ground)) {
-		updateBlocks();
-	}
-
-	blocks?.forEach(block => {
-		const blockLocation = {
-			x1: block.xPosition,
-			y1: block.yPosition - 64,
-			x2: block.xPosition + 64,
-			y2: block.yPosition + 256,
-		};
-		if (checkCollision(activeBlock, blockLocation)) {
-			updateBlocks();
+	useEffect(() => {
+		if (!gameOver) {
+			window.addEventListener('keydown', handleKeyDown);
+			return () => {
+				window.removeEventListener('keydown', handleKeyDown);
+			};
 		}
-	});
+	}, [gameOver]);
+
+	useEffect(() => {
+		if (!gameOver) {
+			const initializer = setInterval(() => {
+				setYPosition(yPosition => yPosition + 64);
+			}, 1000);
+			return () => {
+				clearInterval(initializer);
+			};
+		}
+	}, [blocks, gameOver]);
+
+	useEffect(() => {
+		if (!gameOver) {
+            setLeftOpen(() => true);
+			setRightOpen(() => true);
+			checkCollisions(
+				activeBlock,
+				blocks,
+				updateBlocks,
+				setGameOver,
+				setLeftOpen,
+				setRightOpen
+			);
+		}
+	}, [activeBlock, gameOver]);
 
 	const handleKeyDown = (e: KeyboardEvent) => {
 		const { key } = e;
@@ -98,7 +118,7 @@ export const Game = ({ width, height }: Props) => {
 			case 'a':
 			case 'ArrowLeft':
 				{
-					if (xPositionRef.current > gameWidth / -2) {
+					if (xPositionRef.current > gameWidth / -2 && leftRef.current) {
 						setXPosition(xPosition => xPosition - 64);
 					}
 				}
@@ -106,7 +126,7 @@ export const Game = ({ width, height }: Props) => {
 			case 'd':
 			case 'ArrowRight':
 				{
-					if (xPositionRef.current < gameWidth / 2 - 64) {
+					if (xPositionRef.current < gameWidth / 2 - 64 && rightRef.current) {
 						setXPosition(xPosition => xPosition + 64);
 					}
 				}
@@ -141,6 +161,8 @@ export const Game = ({ width, height }: Props) => {
 				break;
 		}
 	};
+
+	if (gameOver) return <h1 className='text-4xl text-center'>Game Over</h1>;
 
 	return (
 		<Canvas
