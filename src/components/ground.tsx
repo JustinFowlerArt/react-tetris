@@ -1,4 +1,4 @@
-import { gameWidth } from './utilities';
+import { gameWidth } from './gameHelpers';
 
 export const Ground = () => {
 	return (

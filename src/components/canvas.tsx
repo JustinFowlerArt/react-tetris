@@ -7,19 +7,11 @@ interface Props {
 	width: number;
 	height: number;
 	blocks: iBlock[];
-	xPosition: number;
-	yPosition: number;
+	position: { x: number; y: number };
 	rotation: number;
 }
 
-const Canvas = ({
-	width,
-	height,
-	blocks,
-	xPosition,
-	yPosition,
-	rotation,
-}: Props) => {
+const Canvas = ({ width, height, blocks, position, rotation }: Props) => {
 	const viewBox = [width / -2, 100 - height, width, height];
 
 	return (
@@ -29,12 +21,11 @@ const Canvas = ({
 			viewBox={viewBox.toString()}
 		>
 			<Background />
-			<Block xPosition={xPosition} yPosition={yPosition} rotation={rotation} />
+			<Block position={position} rotation={rotation} />
 			{blocks?.map(block => (
 				<Block
 					key={block.id}
-					xPosition={block.xPosition}
-					yPosition={block.yPosition}
+					position={block.position}
 					rotation={block.rotation}
 				/>
 			))}

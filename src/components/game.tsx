@@ -1,79 +1,62 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Canvas from './canvas';
 import { checkCollisions } from './checkCollisions';
-import { checkCollision, gameHeight, gameWidth } from './utilities';
+import { Stage } from './stage';
+// import { handleKeyDown } from './controls';
+import { createStage, gameHeight, gameWidth } from './gameHelpers';
 
 interface Props {
 	width: number;
 	height: number;
 }
 
-export interface iBlock {
+export type iBlock = {
 	id: number;
-	xPosition: number;
-	yPosition: number;
+	position: { x: number; y: number };
 	rotation: number;
 	// subBlocks: Array<iSubBlock>;
 }
 
 // export interface iSubBlock {
-// 	xPosition: number;
-// 	yPosition: number;
+// 	position.x: number;
+// 	position.y: number;
 // }
 
 export const Game = ({ width, height }: Props) => {
 	// const [score, setScore] = useState(0);
+    const [stage, setStage] = useState(createStage())
 	const [gameOver, setGameOver] = useState(false);
-
-	const [leftOpen, setLeftOpen] = useState(true);
-	const leftRef = useRef(leftOpen);
-	leftRef.current = leftOpen;
-
-	const [rightOpen, setRightOpen] = useState(true);
-	const rightRef = useRef(rightOpen);
-	rightRef.current = rightOpen;
-
-	const [blocks, setBlocks] = useState<Array<iBlock>>([]);
 
 	const [counter, setCounter] = useState(0);
 	const countRef = useRef(counter);
 	countRef.current = counter;
 
-	// const [spaceAvailable, setSpaceAvailable] = useState(true);
+	const [blocks, setBlocks] = useState<Array<iBlock>>([]);
 
-	const [xPosition, setXPosition] = useState(0);
-	const xPositionRef = useRef(xPosition);
-	xPositionRef.current = xPosition;
-
-	const [yPosition, setYPosition] = useState(100 - gameHeight);
-	const yPositionRef = useRef(yPosition);
-	yPositionRef.current = yPosition;
+	const [position, setPosition] = useState({ x: 0, y: 100 - gameHeight });
+	const positionRef = useRef(position);
+	positionRef.current = position;
 
 	const [rotation, setRotation] = useState(0);
 	const rotationRef = useRef(rotation);
 	rotationRef.current = rotation;
 
-	const activeBlock = {
-		x1: xPosition - 32,
-		y1: yPosition - 32,
-		x2: xPosition + 32,
-		y2: yPosition + 33,
-	};
+	const [openSpace, setOpenSpace] = useState({ left: true, right: true });
+	const openSpaceRef = useRef(openSpace);
+	openSpaceRef.current = openSpace;
 
 	const updateBlocks = () => {
 		setBlocks([
 			...blocks,
 			{
 				id: counter,
-				xPosition: xPosition,
-				yPosition: yPosition,
+				position: { x: position.x, y: position.y },
 				rotation: rotation,
-				// subBlocks: [{ xPosition, yPosition }],
+				// subBlocks: [{ position.x, position.y }],
 			},
 		]);
 		setCounter(counter + 1);
-		setXPosition(0);
-		setYPosition(100 - gameHeight);
+		setPosition({ x: 0, y: 100 - gameHeight });
 		setRotation(0);
 	};
 
@@ -89,7 +72,9 @@ export const Game = ({ width, height }: Props) => {
 	useEffect(() => {
 		if (!gameOver) {
 			const initializer = setInterval(() => {
-				setYPosition(yPosition => yPosition + 64);
+				setPosition(
+					position => (position = { ...position, y: position.y + 64 })
+				);
 			}, 1000);
 			return () => {
 				clearInterval(initializer);
@@ -97,20 +82,28 @@ export const Game = ({ width, height }: Props) => {
 		}
 	}, [blocks, gameOver]);
 
+	const updateBlock = useCallback(() => {
+		const activeBlock = {
+			x1: position.x - 32,
+			y1: position.y - 32,
+			x2: position.x + 32,
+			y2: position.y + 33,
+		};
+		return activeBlock;
+	}, [position.x, position.y]);
+
 	useEffect(() => {
 		if (!gameOver) {
-            setLeftOpen(() => true);
-			setRightOpen(() => true);
+			setOpenSpace({ left: true, right: true });
 			checkCollisions(
-				activeBlock,
+				updateBlock,
 				blocks,
 				updateBlocks,
 				setGameOver,
-				setLeftOpen,
-				setRightOpen
+				setOpenSpace
 			);
 		}
-	}, [activeBlock, gameOver]);
+	}, [updateBlock, gameOver]);
 
 	const handleKeyDown = (e: KeyboardEvent) => {
 		const { key } = e;
@@ -118,16 +111,26 @@ export const Game = ({ width, height }: Props) => {
 			case 'a':
 			case 'ArrowLeft':
 				{
-					if (xPositionRef.current > gameWidth / -2 && leftRef.current) {
-						setXPosition(xPosition => xPosition - 64);
+					if (
+						positionRef.current.x > gameWidth / -2 &&
+						openSpaceRef.current.left
+					) {
+						setPosition(
+							position => (position = { ...position, x: position.x - 64 })
+						);
 					}
 				}
 				break;
 			case 'd':
 			case 'ArrowRight':
 				{
-					if (xPositionRef.current < gameWidth / 2 - 64 && rightRef.current) {
-						setXPosition(xPosition => xPosition + 64);
+					if (
+						positionRef.current.x < gameWidth / 2 - 64 &&
+						openSpaceRef.current.right
+					) {
+						setPosition(
+							position => (position = { ...position, x: position.x + 64 })
+						);
 					}
 				}
 				break;
@@ -153,7 +156,9 @@ export const Game = ({ width, height }: Props) => {
 				break;
 			case ' ': {
 				{
-					setYPosition(yPosition => yPosition + 64);
+					setPosition(
+						position => (position = { ...position, y: position.y + 64 })
+					);
 				}
 				break;
 			}
@@ -165,12 +170,12 @@ export const Game = ({ width, height }: Props) => {
 	if (gameOver) return <h1 className='text-4xl text-center'>Game Over</h1>;
 
 	return (
+        // <Stage stage={stage} />
 		<Canvas
 			width={width}
 			height={height}
 			blocks={blocks}
-			xPosition={xPosition}
-			yPosition={yPosition}
+			position={position}
 			rotation={rotation}
 		/>
 		// <main className='flex flex-col justify-center items-center'>
@@ -179,15 +184,15 @@ export const Game = ({ width, height }: Props) => {
 		// 	<div className='flex flex-col items-center p-4'>
 		// 		<div className='relative bg-slate-500 w-80 h-[40rem] m-4'>
 		// 			<Block
-		// 				xPosition={xPosition}
-		// 				yPosition={yPosition}
+		// 				position.x={position.x}
+		// 				position.y={position.y}
 		// 				rotation={rotation}
 		// 			/>
 		// 			{blocks?.map(block => (
 		// 				<Block
 		// 					key={block.id}
-		// 					xPosition={block.xPosition}
-		// 					yPosition={block.yPosition}
+		// 					position.x={block.position.x}
+		// 					position.y={block.position.y}
 		// 					rotation={block.rotation}
 		// 				/>
 		// 			))}

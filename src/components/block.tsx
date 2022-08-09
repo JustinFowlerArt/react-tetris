@@ -1,10 +1,9 @@
 interface Props {
-	xPosition: number;
-	yPosition: number;
+	position: { x: number; y: number };
 	rotation: number;
 }
 
-export const Block = ({ xPosition, yPosition, rotation }: Props) => {
+export const Block = ({ position, rotation }: Props) => {
 	return (
 		// <rect
 		// 	x={xPosition}
@@ -13,8 +12,8 @@ export const Block = ({ xPosition, yPosition, rotation }: Props) => {
 		// 	height={256}
 		// 	transform={`rotate(${rotation}, ${xPosition}, ${yPosition + 128})`}
 		// />
-		<g transform={`rotate(${rotation}, ${xPosition + 64}, ${yPosition + 64})`}>
-			<svg x={xPosition} y={yPosition}>
+		<g transform={`rotate(${rotation}, ${position.x + 64}, ${position.y + 64})`}>
+			<svg x={position.x} y={position.y}>
 				<rect fill='blue' x={0} y={0} width={64} height={64}></rect>
 				{/* <rect fill='blue' x={64} y={0} width={64} height={64}></rect>
 				<rect fill='blue' x={64} y={64} width={64} height={64}></rect>

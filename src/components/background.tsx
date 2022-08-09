@@ -1,4 +1,4 @@
-import { gameHeight, gameWidth } from './utilities';
+import { gameHeight, gameWidth } from './gameHelpers';
 
 export const Background = () => {
 	return (

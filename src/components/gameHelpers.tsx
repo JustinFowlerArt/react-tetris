@@ -1,9 +1,11 @@
-interface BoxCollider {
+type BoxCollider = {
 	x1: number;
 	y1: number;
 	x2: number;
 	y2: number;
-}
+};
+
+type Cell = number | string[];
 
 export const checkCollision = (rectA: BoxCollider, rectB: BoxCollider) =>
 	rectA.x1 < rectB.x2 &&
@@ -14,3 +16,6 @@ export const checkCollision = (rectA: BoxCollider, rectB: BoxCollider) =>
 export const gameHeight = 1280;
 
 export const gameWidth = 640;
+
+export const createStage = () =>
+	Array.from(Array(gameHeight), () => new Array(gameWidth).fill([0, 'clear']));

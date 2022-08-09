@@ -1,8 +1,8 @@
 import { iBlock } from './game';
-import { checkCollision, gameHeight, gameWidth } from './utilities';
+import { checkCollision, gameHeight, gameWidth } from './gameHelpers';
 
 export const checkCollisions = (
-	activeBlock: {
+	updateBlock: () => {
 		x1: number;
 		y1: number;
 		x2: number;
@@ -11,9 +11,14 @@ export const checkCollisions = (
 	blocks: iBlock[],
 	updateBlocks: () => void,
 	setGameOver: React.Dispatch<React.SetStateAction<boolean>>,
-	setLeftOpen: React.Dispatch<React.SetStateAction<boolean>>,
-	setRightOpen: React.Dispatch<React.SetStateAction<boolean>>
+	setOpenSpace: React.Dispatch<
+		React.SetStateAction<{
+			left: boolean;
+			right: boolean;
+		}>
+	>
 ) => {
+	const activeBlock = updateBlock();
 	const activeLeftCollider = {
 		...activeBlock,
 		x1: activeBlock.x1 - 1,
@@ -40,19 +45,23 @@ export const checkCollisions = (
 
 	blocks?.forEach(block => {
 		const blockCollider = {
-			x1: block.xPosition - 32,
-			y1: block.yPosition - 32,
-			x2: block.xPosition + 32,
-			y2: block.yPosition + 33,
+			x1: block.position.x - 32,
+			y1: block.position.y - 32,
+			x2: block.position.x + 32,
+			y2: block.position.y + 33,
 		};
-		if (block.yPosition === 100 - gameHeight) {
+		if (block.position.y === 100 - gameHeight) {
 			setGameOver(true);
 		}
 		if (checkCollision(activeLeftCollider, blockCollider)) {
-			setLeftOpen(false);
+			setOpenSpace(
+				openSpace => (openSpace = { left: false, right: openSpace.right })
+			);
 		}
 		if (checkCollision(activeRightCollider, blockCollider)) {
-			setRightOpen(false);
+			setOpenSpace(
+				openSpace => (openSpace = { left: openSpace.left, right: false })
+			);
 		}
 		if (checkCollision(activeBlock, blockCollider)) {
 			updateBlocks();
