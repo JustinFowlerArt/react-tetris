@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Game } from './components/game';
+import { Tetris } from './components/tetris';
 
 export const App = () => {
 	const [width, setWidth] = useState(window.innerWidth);
@@ -15,5 +16,5 @@ export const App = () => {
 		return () => window.removeEventListener('resize', updateWidthAndHeight);
 	}, []);
 
-	return <Game width={width} height={height} />;
+	return <Tetris />;
 };

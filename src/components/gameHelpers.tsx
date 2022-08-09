@@ -13,9 +13,9 @@ export const checkCollision = (rectA: BoxCollider, rectB: BoxCollider) =>
 	rectA.y1 < rectB.y2 &&
 	rectA.y2 > rectB.y1;
 
-export const gameHeight = 1280;
+export const gameHeight = 20;
 
-export const gameWidth = 640;
+export const gameWidth = 12;
 
 export const createStage = () =>
 	Array.from(Array(gameHeight), () => new Array(gameWidth).fill([0, 'clear']));

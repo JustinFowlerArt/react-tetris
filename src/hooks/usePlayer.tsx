@@ -8,5 +8,5 @@ export const usePlayer = () => {
         collided: false
     })
 
-    return [player]
+    return {player}
 }

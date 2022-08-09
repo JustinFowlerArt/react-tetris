@@ -170,7 +170,6 @@ export const Game = ({ width, height }: Props) => {
 	if (gameOver) return <h1 className='text-4xl text-center'>Game Over</h1>;
 
 	return (
-        // <Stage stage={stage} />
 		<Canvas
 			width={width}
 			height={height}
