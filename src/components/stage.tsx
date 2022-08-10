@@ -1,5 +1,5 @@
 import { Cell } from './cell';
-import { IStage } from './gameHelpers'
+import { IStage } from './types';
 
 export const Stage = ({ stage }: { stage: IStage }) => {
 	return (

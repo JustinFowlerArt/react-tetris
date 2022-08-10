@@ -1,21 +1,6 @@
-type Tetrominos = {
-	0: Tetromino;
-	I: Tetromino;
-	J: Tetromino;
-	L: Tetromino;
-	O: Tetromino;
-	S: Tetromino;
-	T: Tetromino;
-	Z: Tetromino;
-};
+import { ITetrominos } from './types';
 
-type Tetromino = {
-	shape: TetrominoShape;
-};
-
-export type TetrominoShape = Array<Array<string | number>>
-
-const tetrominos: Tetrominos = {
+export const tetrominos: ITetrominos = {
 	0: { shape: [[0]] },
 	I: {
 		shape: [
@@ -72,5 +57,5 @@ export const randomTetromino = () => {
 	const tetrominoKeys = 'IJLOSTZ';
 	const randomTetromino =
         tetrominoKeys[Math.floor(Math.random() * tetrominoKeys.length)];
-	return tetrominos[randomTetromino as keyof Tetrominos];
+	return tetrominos[randomTetromino as keyof ITetrominos];
 };

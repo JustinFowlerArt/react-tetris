@@ -1,12 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Cell } from '../components/cell';
-import { clearCell, createStage, IStage } from '../components/gameHelpers';
-import { Player } from './usePlayer';
+import { clearCell, createStage } from '../components/gameHelpers';
+import { IStage, IPlayer } from '../components/types';
 
-export const useStage = (player: Player, resetPlayer: () => void) => {
+export const useStage = (player: IPlayer, resetPlayer: () => void) => {
 	const [stage, setStage] = useState<IStage>(createStage());
+	const [rowsCleared, setRowsCleared] = useState(0);
 
 	useEffect(() => {
+		setRowsCleared(0);
+
+		const sweepRows = (newStage: IStage) =>
+			newStage.reduce((ack: IStage, row) => {
+				if (row.findIndex(cell => cell[0] === 0) === -1) {
+					setRowsCleared(prev => prev + 1);
+					ack.unshift(new Array(newStage[0].length).fill(clearCell));
+					return ack;
+				}
+				ack.push(row);
+				return ack;
+			}, []);
+
 		const updateStage = (prevStage: IStage): IStage => {
 			// First flush the stage
 			const newStage: IStage = prevStage.map(row =>
@@ -26,12 +40,17 @@ export const useStage = (player: Player, resetPlayer: () => void) => {
 					}
 				});
 			});
+			// Then check if we collided
+			if (player.collided) {
+				resetPlayer();
+				return sweepRows(newStage);
+			}
 
 			return newStage;
 		};
 
 		setStage(prev => updateStage(prev));
-	}, [player.collided, player.pos.x, player.pos.y, player.tetromino]);
+	}, [player, resetPlayer]);
 
-	return { stage, setStage };
+	return { stage, setStage, rowsCleared };
 };
