@@ -1,4 +1,6 @@
-export const Cell = ({ type }: { type: string | number }) => {
+import React from 'react';
+
+const Cell = ({ type }: { type: string | number }) => {
 	return (
 		<div
 			className={`aspect-square w-full ${
@@ -21,3 +23,5 @@ export const Cell = ({ type }: { type: string | number }) => {
 		></div>
 	);
 };
+
+export default React.memo(Cell);

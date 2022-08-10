@@ -1,17 +1,22 @@
 import { useState } from 'react';
+import { useGameStatus } from '../hooks/useGameStatus';
 import { useInterval } from '../hooks/useInterval';
 import { usePlayer } from '../hooks/usePlayer';
 import { useStage } from '../hooks/useStage';
 import { checkCollision, createStage } from './gameHelpers';
-import { Menu } from './menu';
 import { Stage } from './stage';
+import { Display } from './display';
 
 export const Tetris = () => {
 	const [dropTime, setDropTime] = useState<number | null>(null);
 	const [gameOver, setGameOver] = useState(false);
 
 	const { player, updatePlayerPos, resetPlayer, playerRotate } = usePlayer();
-	const { stage, setStage } = useStage(player, resetPlayer);
+	const { stage, setStage, rowsCleared } = useStage(player, resetPlayer);
+	const { score, setScore, rows, setRows, level, setLevel } =
+		useGameStatus(rowsCleared);
+
+	const speed = 1000 / (level + 1) + 200;
 
 	const playerMove = (dir: number) => {
 		if (!checkCollision(player, stage, { x: dir, y: 0 })) {
@@ -22,12 +27,21 @@ export const Tetris = () => {
 	const startGame = () => {
 		// Reset everything
 		setStage(createStage());
-		setDropTime(1000);
+		setDropTime(speed);
 		resetPlayer();
 		setGameOver(false);
+		setScore(0);
+		setRows(0);
+		setLevel(0);
 	};
 
 	const drop = () => {
+		// Increase level when player has cleared 10 rows
+		if (rows > (level + 1) * 10) {
+			setLevel(prev => prev + 1);
+			// Also increase speed
+			setDropTime(speed);
+		}
 		if (!checkCollision(player, stage, { x: 0, y: 1 })) {
 			updatePlayerPos(0, 1, false);
 		} else {
@@ -47,7 +61,7 @@ export const Tetris = () => {
 	const handleKeyUp = ({ key }: React.KeyboardEvent<HTMLElement>) => {
 		if (!gameOver) {
 			if (key === 's' || key === 'ArrowDown') {
-				setDropTime(1000);
+				setDropTime(speed);
 			}
 		}
 	};
@@ -86,15 +100,26 @@ export const Tetris = () => {
 	}, dropTime);
 
 	return (
-		<main
+		<div
 			className='h-screen w-screen bg-black flex justify-center items-center space-x-6'
 			role='button'
 			tabIndex={0}
 			onKeyDown={e => handleMove(e)}
-            onKeyUp={e => handleKeyUp(e)}
+			onKeyUp={e => handleKeyUp(e)}
 		>
 			<Stage stage={stage} />
-			<Menu startGame={startGame} gameOver={gameOver} />
-		</main>
+			<aside className='flex flex-col space-y-4 w-48'>
+				{gameOver && <Display text='Game Over' />}
+				<Display text={`Score: ${score}`} />
+				<Display text={`Rows: ${rows}`} />
+				<Display text={`Level: ${level}`} />
+				<button
+					className='bg-slate-400 text-slate-900 border rounded-xl py-3 px-6 font-bold hover:bg-slate-900 hover:border-slate-400 hover:text-slate-400'
+					onClick={startGame}
+				>
+					Start Game
+				</button>
+			</aside>
+		</div>
 	);
 };

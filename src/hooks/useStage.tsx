@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Cell } from '../components/cell';
 import { clearCell, createStage } from '../components/gameHelpers';
 import { IStage, IPlayer } from '../components/types';
 
@@ -25,7 +24,7 @@ export const useStage = (player: IPlayer, resetPlayer: () => void) => {
 			// First flush the stage
 			const newStage: IStage = prevStage.map(row =>
 				row.map(cell =>
-					cell[1 as keyof typeof Cell] === 'clear' ? clearCell : cell
+					cell[1] === 'clear' ? clearCell : cell
 				)
 			);
 
