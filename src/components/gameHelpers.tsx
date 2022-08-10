@@ -5,17 +5,21 @@ type BoxCollider = {
 	y2: number;
 };
 
-type Cell = number | string[];
-
 export const checkCollision = (rectA: BoxCollider, rectB: BoxCollider) =>
 	rectA.x1 < rectB.x2 &&
 	rectA.x2 > rectB.x1 &&
 	rectA.y1 < rectB.y2 &&
 	rectA.y2 > rectB.y1;
 
-export const gameHeight = 20;
+export type IStage = Array<Array<ICell>>;
 
-export const gameWidth = 12;
+export type ICell = (number | string)[];
 
-export const createStage = () =>
-	Array.from(Array(gameHeight), () => new Array(gameWidth).fill([0, 'clear']));
+export const clearCell: ICell = [0, 'clear'];
+
+export const stageHeight = 20;
+
+export const stageWidth = 12;
+
+export const createStage = (): IStage =>
+	Array.from(Array(stageHeight), () => new Array(stageWidth).fill(clearCell));
