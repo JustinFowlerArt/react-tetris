@@ -101,25 +101,25 @@ export const Tetris = () => {
 
 	return (
 		<div
-			className='h-screen w-screen bg-black flex justify-center items-center space-x-6'
+			className='h-screen w-screen bg-black flex flex-col justify-center items-center text-sm xs:text-base sm:flex-row'
 			role='button'
 			tabIndex={0}
 			onKeyDown={e => handleMove(e)}
 			onKeyUp={e => handleKeyUp(e)}
 		>
-			<Stage stage={stage} />
-			<aside className='flex flex-col space-y-4 w-48'>
+			<aside className='grid grid-cols-2 gap-2 mb-4 sm:mb-0 sm:gap-4 sm:w-48 sm:order-2 sm:ml-6'>
 				{gameOver && <Display text='Game Over' />}
-				<Display text={`Score: ${score}`} />
-				<Display text={`Rows: ${rows}`} />
-				<Display text={`Level: ${level}`} />
+				<Display key={`Score: ${score}`} text='Score: ' value={score} />
+				<Display key={`Rows: ${rows}`} text='Rows: ' value={rows} />
+				<Display key={`Level: ${level}`} text='Level: ' value={level} />
 				<button
-					className='bg-slate-400 text-slate-900 border rounded-xl py-3 px-6 font-bold hover:bg-slate-900 hover:border-slate-400 hover:text-slate-400'
+					className='bg-slate-400 text-slate-900 border font-bold rounded-xl py-2 px-4 sm:py-3 sm:px-6 sm:col-span-2 hover:bg-slate-900 hover:border-slate-400 hover:text-slate-400'
 					onClick={startGame}
 				>
-					Start Game
+					START GAME
 				</button>
 			</aside>
+			<Stage stage={stage} />
 		</div>
 	);
 };

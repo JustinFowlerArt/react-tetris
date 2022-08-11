@@ -1,6 +1,11 @@
 import React from 'react';
 
-const Cell = ({ type }: { type: string | number }) => {
+interface Props {
+    type: string | number;
+    status: string | number
+}
+
+const Cell = ({type, status}: Props) => {
 	return (
 		<div
 			className={`aspect-square w-full ${
@@ -18,8 +23,8 @@ const Cell = ({ type }: { type: string | number }) => {
 					? 'border-4 bg-orange-600/80 border-orange-400 border-b-orange-400/10 border-l-orange-400/30'
 					: type === 'Z'
 					? 'border-4 bg-indigo-600/80 border-indigo-400 border-b-indigo-400/10 border-l-indigo-400/30'
-					: 'border bg-slate-900 border-slate-800'
-			}`}
+					: 'border border-slate-800'
+			} ${status === 'merged' ? 'animate-bounce-once' : ''}`}
 		></div>
 	);
 };
